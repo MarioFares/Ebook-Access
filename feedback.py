@@ -1,0 +1,112 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'feedback.ui'
+#
+# Created by: PyQt5 UI code generator 5.13.2
+#
+# WARNING! All changes made in this file will be lost!
+
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+import webbrowser
+
+
+# noinspection PyAttributeOutsideInit
+class FeedbackDialog(object):
+    # noinspection PyTypeChecker
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(400, 321)
+        self.horizontalLayoutWidget = QtWidgets.QWidget(Dialog)
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(-1, 0, 401, 80))
+        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
+        self.title_layout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
+        self.title_layout.setContentsMargins(0, 0, 0, 0)
+        self.title_layout.setObjectName("title_layout")
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.title_layout.addItem(spacerItem)
+        self.title_label = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        font = QtGui.QFont()
+        font.setFamily("Garamond")
+        font.setPointSize(20)
+        self.title_label.setFont(font)
+        self.title_label.setObjectName("title_label")
+        self.title_layout.addWidget(self.title_label)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.title_layout.addItem(spacerItem1)
+        self.horizontalLayoutWidget_2 = QtWidgets.QWidget(Dialog)
+        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(-1, 80, 401, 80))
+        self.horizontalLayoutWidget_2.setObjectName("horizontalLayoutWidget_2")
+        self.text_layout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
+        self.text_layout.setContentsMargins(0, 0, 0, 0)
+        self.text_layout.setObjectName("text_layout")
+        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.text_layout.addItem(spacerItem2)
+        self.text_label = QtWidgets.QLabel(self.horizontalLayoutWidget_2)
+        font = QtGui.QFont()
+        font.setFamily("Garamond")
+        font.setPointSize(12)
+        self.text_label.setFont(font)
+        self.text_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.text_label.setWordWrap(True)
+        self.text_label.setObjectName("text_label")
+        self.text_layout.addWidget(self.text_label)
+        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.text_layout.addItem(spacerItem3)
+        self.horizontalLayoutWidget_3 = QtWidgets.QWidget(Dialog)
+        self.horizontalLayoutWidget_3.setGeometry(QtCore.QRect(100, 160, 217, 60))
+        self.horizontalLayoutWidget_3.setObjectName("horizontalLayoutWidget_3")
+        self.gmail_layout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_3)
+        self.gmail_layout.setContentsMargins(0, 0, 0, 0)
+        self.gmail_layout.setObjectName("gmail_layout")
+        self.gmail_pushButton = QtWidgets.QPushButton(self.horizontalLayoutWidget_3)
+        self.gmail_pushButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.gmail_pushButton.setText("")
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("./Icons/gmail_icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.gmail_pushButton.setIcon(icon)
+        self.gmail_pushButton.setIconSize(QtCore.QSize(50, 50))
+        self.gmail_pushButton.setFlat(True)
+        self.gmail_pushButton.setObjectName("gmail_pushButton")
+        self.gmail_layout.addWidget(self.gmail_pushButton)
+        self.gmail_label = QtWidgets.QLabel(self.horizontalLayoutWidget_3)
+        font = QtGui.QFont()
+        font.setItalic(False)
+        self.gmail_label.setFont(font)
+        self.gmail_label.setObjectName("gmail_label")
+        self.gmail_layout.addWidget(self.gmail_label)
+        self.horizontalLayoutWidget_4 = QtWidgets.QWidget(Dialog)
+        self.horizontalLayoutWidget_4.setGeometry(QtCore.QRect(110, 230, 221, 61))
+        self.horizontalLayoutWidget_4.setObjectName("horizontalLayoutWidget_4")
+        self.github_layout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_4)
+        self.github_layout.setContentsMargins(0, 0, 0, 0)
+        self.github_layout.setObjectName("github_layout")
+        self.github_pushButton = QtWidgets.QPushButton(self.horizontalLayoutWidget_4)
+        self.github_pushButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.github_pushButton.setText("")
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap("./Icons/github_icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.github_pushButton.setIcon(icon1)
+        self.github_pushButton.setIconSize(QtCore.QSize(50, 50))
+        self.github_pushButton.setFlat(True)
+        self.github_pushButton.setObjectName("github_pushButton")
+        self.github_layout.addWidget(self.github_pushButton)
+        self.github_label = QtWidgets.QLabel(self.horizontalLayoutWidget_4)
+        font = QtGui.QFont()
+        font.setItalic(False)
+        self.github_label.setFont(font)
+        self.github_label.setObjectName("github_label")
+        self.github_layout.addWidget(self.github_label)
+        self.gmail_pushButton.clicked.connect(lambda: webbrowser.open("https://gmail.com"))
+        self.github_pushButton.clicked.connect(lambda: webbrowser.open("https://github.com"))
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.title_label.setText(_translate("Dialog", "Submit Feedback"))
+        self.text_label.setText(_translate("Dialog", "We would love it if you submit some feedback for this "
+                                                     "application!"))
+        self.gmail_label.setText(_translate("Dialog", "mariofares02@gmail.com"))
+        self.github_label.setText(_translate("Dialog", "https://github.com/MarioFares"))
