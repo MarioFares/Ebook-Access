@@ -9,11 +9,20 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sqlite3
+from error import error_box
 
 
 # noinspection PyAttributeOutsideInit
 class SettingsDialog(object):
+    def __init__(self, main_window, menu_bar, status_bar, title_label):
+        self.main_window = main_window
+        self.menu_bar = menu_bar
+        self.status_bar = status_bar
+        self.title_label = title_label
+
+    # noinspection PyTypeChecker
     def setupUi(self, Dialog):
+        self.dialog = Dialog
         Dialog.setObjectName("Dialog")
         Dialog.setEnabled(True)
         Dialog.resize(721, 576)
@@ -668,6 +677,20 @@ class SettingsDialog(object):
         self.connect = sqlite3.connect('ebook.db')
         self.cursor = self.connect.cursor()
 
+        self.apply_pushButton.clicked.connect(lambda: self.apply_style())
+        self.save_pushButton.clicked.connect(lambda: self.save_style())
+        self.ok_pushButton.clicked.connect(lambda: self.ok_apply_style())
+        self.load_pushButton.clicked.connect(lambda: self.load_style())
+        self.activate_theme_pushButton.clicked.connect(lambda: self.activate_theme())
+        self.defaults_pushButton.clicked.connect(
+            lambda: self.saved_themes_comboBox.setCurrentText("Default"))
+        self.defaults_pushButton.clicked.connect(lambda: self.apply_style())
+        self.saved_themes_comboBox.removeItem(0)
+        self.saved_themes_comboBox.insertItem(0, "")
+        self.saved_themes_comboBox.removeItem(1)
+        self.saved_themes_comboBox.insertItem(1, "Default")
+        self.refresh_themes()
+
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
@@ -909,3 +932,245 @@ class SettingsDialog(object):
         self.ok_pushButton.setText(_translate("Dialog", "OK"))
         self.apply_pushButton.setText(_translate("Dialog", "Apply"))
         self.defaults_pushButton.setText(_translate("Dialog", "Defaults"))
+
+    def refresh_themes(self):
+        with self.connect:
+            self.cursor.execute("SELECT name FROM settings")
+            themes = self.cursor.fetchall()
+            for theme in themes:
+                self.saved_themes_comboBox.addItem(theme[0])
+
+    def activate_theme(self):
+        theme_name = self.saved_themes_comboBox.currentText()
+        with self.connect:
+            self.cursor.execute("UPDATE settings SET active=0 WHERE active=1")
+            self.cursor.execute("UPDATE settings SET active=1 WHERE name=?", (theme_name,))
+        self.load_style()
+        self.apply_style()
+
+    def load_style(self):
+        theme_name = self.saved_themes_comboBox.currentText()
+        with self.connect:
+            self.cursor.execute("SELECT * FROM settings WHERE name=?", (theme_name,))
+            theme = self.cursor.fetchone()
+        if theme is None:
+            return 0
+        else:
+            self.labels_font_comboBox.setCurrentText(theme[1])
+            self.labels_color_comboBox.setCurrentText(theme[2])
+            self.labels_font_color_comboBox.setCurrentText(theme[3])
+            self.title_font_comboBox.setCurrentText(theme[4])
+            self.title_color_comboBox.setCurrentText(theme[5])
+            self.title_font_color_comboBox.setCurrentText(theme[6])
+            self.menubar_font_comboBox.setCurrentText(theme[7])
+            self.menubar_color_comboBox.setCurrentText(theme[8])
+            self.menubar_font_color_comboBox.setCurrentText(theme[9])
+            self.statusbar_font_comboBox.setCurrentText(theme[10])
+            self.statusbar_color_comboBox.setCurrentText(theme[11])
+            self.statusbar_font_color_comboBox.setCurrentText(theme[12])
+            self.button_font_comboBox.setCurrentText(theme[13])
+            self.button_color_comboBox.setCurrentText(theme[14])
+            self.button_radius_comboBox_2.setCurrentText(str(theme[15]))
+            self.button_font_color_comboBox_2.setCurrentText(theme[16])
+            self.inputbox_font_comboBox.setCurrentText(theme[17])
+            self.inputbox_color_comboBox_2.setCurrentText(theme[18])
+            self.inputbox_radius_comboBox.setCurrentText(str(theme[19]))
+            self.inputbox_font_color_comboBox.setCurrentText(theme[20])
+            self.combobox_font_comboBox.setCurrentText(theme[21])
+            self.combobox_color_comboBox.setCurrentText(theme[22])
+            self.combobox_radius_comboBox.setCurrentText(str(theme[23]))
+            self.combobox_font_color_comboBox.setCurrentText(theme[24])
+            self.background_color_comboBox.setCurrentText(theme[25])
+
+    def ok_apply_style(self):
+        self.apply_style()
+        self.dialog.close()
+
+    def apply_active_theme(self):
+        with self.connect:
+            self.cursor.execute("SELECT * FROM settings WHERE active=1")
+            theme = self.cursor.fetchone()
+        if theme is None:
+            self.main_window.setStyleSheet("background_color: white")
+            self.menu_bar.setStyleSheet("background-color: rgb(216, 216, 216);")
+            self.status_bar.setStyleSheet("background-color: rgb(216, 216, 216);")
+            self.title_label.setStyleSheet("background-color: white")
+        else:
+            if theme[11] == "Light Grey":
+                statusbar_color = "rgb(216, 216, 216)"
+            else:
+                statusbar_color = theme[11]
+            if theme[8] == "Light Grey":
+                menubar_color = "rgb(216, 216, 216)"
+            else:
+                menubar_color = theme[8]
+            self.title_label.setStyleSheet(
+                f"font-family: {theme[4]};\n"
+                f"color: {theme[6]};\n"
+                f"border-radius: {str(theme[15])}px;\n"
+                f"background-color: {theme[5]};")
+            self.menu_bar.setStyleSheet(f"font-family: {theme[7]};\n"
+                                        f"color: {theme[9]};\n"
+                                        f"background-color: {menubar_color};")
+            self.status_bar.setStyleSheet(f"font-family: {theme[10]};\n"
+                                          f"color: {theme[12]};\n"
+                                          f"background-color: {statusbar_color};"
+                                          )
+            self.main_window.setStyleSheet(
+                f"#centralwidget{{background-color: {theme[25]};}}\n"
+                f"QLabel{{font-family: {theme[1]};\n"
+                f"color: {theme[3]};\n"
+                f"border-width: 2px;\n"
+                f"border-radius: {str(theme[15])}px;\n"
+                f"background-color: {theme[2]}}}\n"
+
+                f"QLineEdit{{font-family: {theme[17]};\n"
+                f"color: {theme[20]};\n"
+                "border-width: 2px;\n"
+                f"border-radius: {str(theme[19])}px;\n"
+                f"background-color: {theme[18]}}}\n"
+
+                f"QComboBox{{font-family: {theme[21]};\n"
+                f"color: {theme[24]};\n"
+                "border-width: 2px;\n"
+                f"border-radius: {str(theme[23])}px;\n"
+                f"background-color: {theme[22]}}}\n"
+
+                f"QPushButton{{font-family: {theme[13]};\n"
+                f"color: {theme[16]};\n"
+                "border-width: 2px;\n"
+                f"border-radius: {str(theme[15])}px;\n"
+                f"background-color: {theme[14]}}}\n"
+
+                f"QListWidget{{background-color: {theme[2]};\n"
+                f"color: {theme[3]};\n"
+                f"border-radius: {str(theme[15])}px;\n"
+                f"font-family: {theme[1]}}};\n"
+            )
+
+    def apply_style(self):
+        if self.saved_themes_comboBox.currentText() == "Default":
+            self.main_window.setStyleSheet("background_color: white")
+            self.menu_bar.setStyleSheet("background-color: rgb(216, 216, 216);")
+            self.status_bar.setStyleSheet("background-color: rgb(216, 216, 216);")
+            self.title_label.setStyleSheet("background-color: white")
+        else:
+            if self.statusbar_color_comboBox.currentText() == "Light Grey":
+                statusbar_color = "rgb(216, 216, 216)"
+            else:
+                statusbar_color = self.statusbar_color_comboBox.currentText()
+            if self.menubar_color_comboBox.currentText() == "Light Grey":
+                menubar_color = "rgb(216, 216, 216)"
+            else:
+                menubar_color = self.menubar_color_comboBox.currentText()
+            self.title_label.setStyleSheet(
+                f"font-family: {self.title_font_comboBox.currentText()};\n"
+                f"color: {self.title_font_color_comboBox.currentText()};\n"
+                f"border-radius: {self.button_radius_comboBox_2.currentText()}px;\n"
+                f"background-color: {self.title_color_comboBox.currentText()};")
+            self.menu_bar.setStyleSheet(f"font-family: {self.menubar_font_comboBox.currentText()};\n"
+                                        f"color: {self.menubar_font_color_comboBox.currentText()};\n"
+                                        f"background-color: {menubar_color};")
+            self.status_bar.setStyleSheet(f"font-family: {self.statusbar_font_comboBox.currentText()};\n"
+                                          f"color: {self.statusbar_font_color_comboBox.currentText()};\n"
+                                          f"background-color: {statusbar_color};"
+                                          )
+            self.main_window.setStyleSheet(
+                f"#centralwidget{{background-color: {self.background_color_comboBox.currentText()};}}\n"
+                f"QLabel{{font-family: {self.labels_font_comboBox.currentText()};\n"
+                f"color: {self.labels_font_color_comboBox.currentText()};\n"
+                f"border-width: 2px;\n"
+                f"border-radius: {self.button_radius_comboBox_2.currentText()}px;\n"
+                f"background-color: {self.labels_color_comboBox.currentText()}}}\n"
+
+                f"QLineEdit{{font-family: {self.inputbox_font_comboBox.currentText()};\n"
+                f"color: {self.inputbox_font_color_comboBox.currentText()};\n"
+                "border-width: 2px;\n"
+                f"border-radius: {self.inputbox_radius_comboBox.currentText()}px;\n"
+                f"background-color: {self.inputbox_color_comboBox_2.currentText()}}}\n"
+
+                f"QComboBox{{font-family: {self.combobox_font_comboBox.currentText()};\n"
+                f"color: {self.combobox_font_color_comboBox.currentText()};\n"
+                "border-width: 2px;\n"
+                f"border-radius: {self.combobox_radius_comboBox.currentText()}px;\n"
+                f"background-color: {self.combobox_color_comboBox.currentText()}}}\n"
+
+                f"QPushButton{{font-family: {self.button_font_comboBox.currentText()};\n"
+                f"color: {self.button_font_color_comboBox_2.currentText()};\n"
+                "border-width: 2px;\n"
+                f"border-radius: {self.button_radius_comboBox_2.currentText()}px;\n"
+                f"background-color: {self.button_color_comboBox.currentText()}}}\n"
+
+                f"QListWidget{{background-color: {self.labels_color_comboBox.currentText()};\n"
+                f"color: {self.labels_font_color_comboBox.currentText()};\n"
+                f"border-radius: {self.combobox_radius_comboBox.currentText()}px;\n"
+                f"font-family: {self.combobox_font_comboBox.currentText()}}};\n"
+            )
+
+    def save_style(self):
+        if self.theme_name_lineEdit.text() == '':
+            error_box("You must specify a name for your theme.")
+            return 0
+        with self.connect:
+            self.cursor.execute("SELECT name FROM settings")
+            themes = [theme[0] for theme in self.cursor.fetchall()]
+            if self.theme_name_lineEdit.text() in themes:
+                error_box("There is already a theme by that name.")
+                return 0
+            self.cursor.execute("""INSERT INTO settings (name,
+                                                       label_font,
+                                                       label_color,
+                                                       label_font_color,
+                                                       title_font,
+                                                       title_color,
+                                                       title_font_color,
+                                                       menubar_font,
+                                                       menubar_color,
+                                                       menubar_font_color,
+                                                       statusbar_font,
+                                                       statusbar_color,
+                                                       statusbar_font_color,
+                                                       button_font,
+                                                       button_color,
+                                                       button_radius,
+                                                       button_font_color,
+                                                       inputbox_font,
+                                                       inputbox_color,
+                                                       inputbox_radius,
+                                                       inputbox_font_color,
+                                                       combobox_font,
+                                                       combobox_color,
+                                                       combobox_radius,
+                                                       combobox_font_color,
+                                                       bg_color,
+                                                       active)  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
+                                                                        ?,?,?)""",
+                                (self.theme_name_lineEdit.text(),
+                                 self.labels_font_comboBox.currentText(),
+                                 self.labels_color_comboBox.currentText(),
+                                 self.labels_font_color_comboBox.currentText(),
+                                 self.title_font_comboBox.currentText(),
+                                 self.title_color_comboBox.currentText(),
+                                 self.title_font_color_comboBox.currentText(),
+                                 self.menubar_font_comboBox.currentText(),
+                                 self.menubar_color_comboBox.currentText(),
+                                 self.menubar_font_color_comboBox.currentText(),
+                                 self.statusbar_font_comboBox.currentText(),
+                                 self.statusbar_color_comboBox.currentText(),
+                                 self.statusbar_font_color_comboBox.currentText(),
+                                 self.button_font_comboBox.currentText(),
+                                 self.button_color_comboBox.currentText(),
+                                 self.button_radius_comboBox_2.currentText(),
+                                 self.button_font_color_comboBox_2.currentText(),
+                                 self.inputbox_font_comboBox.currentText(),
+                                 self.inputbox_color_comboBox_2.currentText(),
+                                 self.inputbox_radius_comboBox.currentText(),
+                                 self.inputbox_font_color_comboBox.currentText(),
+                                 self.combobox_font_comboBox.currentText(),
+                                 self.combobox_color_comboBox.currentText(),
+                                 self.combobox_radius_comboBox.currentText(),
+                                 self.combobox_font_color_comboBox.currentText(),
+                                 self.background_color_comboBox.currentText(),
+                                 0
+                                 ))
+        self.refresh_themes()
